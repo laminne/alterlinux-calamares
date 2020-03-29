@@ -69,11 +69,13 @@ public:
             if ( anyFailed && !job->isEmergency() )
             {
                 cDebug() << "Skipping non-emergency job" << job->prettyName();
+                ++m_jobIndex;
                 continue;
             }
 
             emitProgress();
-            cDebug() << "Starting" << ( anyFailed ? "EMERGENCY JOB" : "job" ) << job->prettyName() << " (there are" << m_jobs.count() << " left)";
+            cDebug() << "Starting" << ( anyFailed ? "EMERGENCY JOB" : "job" ) << job->prettyName() << " (there are"
+                     << m_jobs.count() << " left)";
             connect( job.data(), &Job::progress, this, &JobThread::emitProgress );
             JobResult result = job->exec();
             if ( !anyFailed && !result )
@@ -82,10 +84,8 @@ public:
                 message = result.message();
                 details = result.details();
             }
-            if ( !anyFailed )
-            {
-                ++m_jobIndex;
-            }
+            emitProgress( 1.0 );
+            ++m_jobIndex;
         }
         if ( anyFailed )
         {
@@ -113,22 +113,22 @@ private:
         int jobCount = m_jobs.size();
         QString message = m_jobIndex < jobCount ? m_jobs.at( m_jobIndex )->prettyStatusMessage() : tr( "Done" );
 
-        qreal cumulativeProgress = 0.0;
-        for ( auto jobWeight : m_jobWeights.mid( 0, m_jobIndex ) )
-        {
-            cumulativeProgress += jobWeight;
-        }
-        qreal percent
-            = m_jobIndex < jobCount ? cumulativeProgress + ( ( m_jobWeights.at( m_jobIndex ) ) * jobPercent ) : 1.0;
-
+        qreal percent = 1.0;  // Pretend we're done, since the if will reset it
         if ( m_jobIndex < jobCount )
         {
-            Logger::CDebug( Logger::LOGVERBOSE ) << "[JOBQUEUE]: Progress for Job[" << m_jobIndex
-                                         << "]: " << ( jobPercent * 100 ) << "% completed";
-            Logger::CDebug( Logger::LOGVERBOSE ) << "[JOBQUEUE]: Progress Overall: " << ( cumulativeProgress * 100 )
-                                         << "% (accumulated) + "
-                                         << ( ( ( m_jobWeights.at( m_jobIndex ) ) * jobPercent ) * 100 )
-                                         << "% (this job) = " << ( percent * 100 ) << "% (total)";
+            qreal cumulativeProgress = 0.0;
+            for ( auto jobWeight : m_jobWeights.mid( 0, m_jobIndex ) )
+            {
+                cumulativeProgress += jobWeight;
+            }
+            percent = cumulativeProgress + ( ( m_jobWeights.at( m_jobIndex ) ) * jobPercent );
+
+            Logger::CDebug( Logger::LOGVERBOSE )
+                << "[JOBQUEUE]: Progress for Job[" << m_jobIndex << "]: " << ( jobPercent * 100 ) << "% completed";
+            Logger::CDebug( Logger::LOGVERBOSE )
+                << "[JOBQUEUE]: Progress Overall: " << ( cumulativeProgress * 100 ) << "% (accumulated) + "
+                << ( ( ( m_jobWeights.at( m_jobIndex ) ) * jobPercent ) * 100 )
+                << "% (this job) = " << ( percent * 100 ) << "% (total)";
         }
         QMetaObject::invokeMethod(
             m_queue, "progress", Qt::QueuedConnection, Q_ARG( qreal, percent ), Q_ARG( QString, message ) );
@@ -140,7 +140,7 @@ private:
             m_queue, "failed", Qt::QueuedConnection, Q_ARG( QString, message ), Q_ARG( QString, details ) );
     }
 
-    void emitFinished() { QMetaObject::invokeMethod( m_queue, "finished", Qt::QueuedConnection ); }
+    void emitFinished() { QMetaObject::invokeMethod( m_queue, "finish", Qt::QueuedConnection ); }
 };
 
 JobThread::~JobThread() {}
@@ -195,6 +195,7 @@ JobQueue::start()
     Q_ASSERT( !m_thread->isRunning() );
     m_thread->setJobs( std::move( m_jobs ) );
     m_jobs.clear();
+    m_finished = false;
     m_thread->start();
 }
 
@@ -214,6 +215,13 @@ JobQueue::enqueue( const JobList& jobs )
     Q_ASSERT( !m_thread->isRunning() );
     m_jobs.append( jobs );
     emit queueChanged( m_jobs );
+}
+
+void
+JobQueue::finish()
+{
+    m_finished = true;
+    emit finished();
 }
 
 }  // namespace Calamares
