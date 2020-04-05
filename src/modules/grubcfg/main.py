@@ -190,7 +190,11 @@ def modify_grub_default(partitions, root_mount_point, distributor):
                 have_kernel_cmd = True
             elif (lines[i].startswith("#GRUB_DISTRIBUTOR")
                   or lines[i].startswith("GRUB_DISTRIBUTOR")):
-                if libcalamares.job.configuration.get("keepDistributor", False):
+                if "keepDistributor" in libcalamares.job.configuration:
+                    keepDistributor = libcalamares.job.configuration["keepDistributor"]
+                else:
+                    keepDistributor = False
+                if not keepDistributor:
                     lines[i] = distributor_line
                     have_distributor_line = True
                 else:
