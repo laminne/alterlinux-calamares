@@ -123,14 +123,24 @@ public:
         Free
     };
     Q_ENUM( WindowPlacement )
-    ///@brief What kind of sidebar to use in the main window
-    enum class SidebarFlavor
+    ///@brief What kind of panel (sidebar, navigation) to use in the main window
+    enum class PanelFlavor
     {
         None,
         Widget,
         Qml
     };
-    Q_ENUM( SidebarFlavor )
+    Q_ENUM( PanelFlavor )
+    ///@brief Where to place a panel (sidebar, navigation)
+    enum class PanelSide
+    {
+        None,
+        Left,
+        Right,
+        Top,
+        Bottom
+    };
+    Q_ENUM( PanelSide )
 
     static Branding* instance();
 
@@ -185,7 +195,9 @@ public:
     bool windowPlacementCentered() const { return m_windowPlacement == WindowPlacement::Center; }
 
     ///@brief Which sidebar flavor is configured
-    SidebarFlavor sidebarFlavor() const { return m_sidebarFlavor; }
+    PanelFlavor sidebarFlavor() const { return m_sidebarFlavor; }
+    ///@brief Which navigation flavor is configured
+    PanelFlavor navigationFlavor() const { return m_navigationFlavor; }
 
     /**
      * Creates a map called "branding" in the global storage, and inserts an
@@ -198,6 +210,9 @@ public slots:
     QString string( StringEntry stringEntry ) const;
     QString styleString( StyleEntry styleEntry ) const;
     QString imagePath( ImageEntry imageEntry ) const;
+
+    PanelSide sidebarSide() const { return m_sidebarSide; }
+    PanelSide navigationSide() const { return m_navigationSide; }
 
 private:
     static Branding* s_instance;
@@ -227,7 +242,10 @@ private:
     WindowDimension m_windowHeight, m_windowWidth;
     WindowPlacement m_windowPlacement;
 
-    SidebarFlavor m_sidebarFlavor = SidebarFlavor::Widget;
+    PanelFlavor m_sidebarFlavor = PanelFlavor::Widget;
+    PanelFlavor m_navigationFlavor = PanelFlavor::Widget;
+    PanelSide m_sidebarSide = PanelSide::Left;
+    PanelSide m_navigationSide = PanelSide::Bottom;
 };
 
 template < typename U >
