@@ -20,7 +20,7 @@ calamares_add_plugin( locale
         LocaleViewStep.cpp
         SetTimezoneJob.cpp
         timezonewidget/timezonewidget.cpp
-        timezonewidget/localeglobal.cpp
+        timezonewidget/TimeZoneImage.cpp
     UI
     RESOURCES
         locale.qrc
@@ -37,4 +37,10 @@ calamares_add_test(
     SOURCES
         Tests.cpp
         LocaleConfiguration.cpp
+        timezonewidget/TimeZoneImage.cpp
+    DEFINITIONS
+        SOURCE_DIR="${CMAKE_CURRENT_LIST_DIR}/images"
+        DEBUG_TIMEZONES=1
+    LIBRARIES
+        Qt5::Gui
 )
