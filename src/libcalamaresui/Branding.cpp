@@ -67,16 +67,18 @@ const QStringList Branding::s_stringEntryStrings =
     "productUrl",
     "supportUrl",
     "knownIssuesUrl",
-    "releaseNotesUrl"
+    "releaseNotesUrl",
+    "donateUrl"
 };
 
 
 const QStringList Branding::s_imageEntryStrings =
 {
-    "productLogo",
+    "productBanner",
     "productIcon",
-    "productWelcome",
-    "productWallpaper"
+    "productLogo",
+    "productWallpaper",
+    "productWelcome"
 };
 
 const QStringList Branding::s_styleEntryStrings =
@@ -192,7 +194,7 @@ Branding::Branding( const QString& brandingFilePath, QObject* parent )
                 { QStringLiteral( "VARIANT" ), relInfo.variant() },
                 { QStringLiteral( "VARIANT_ID" ), relInfo.variantId() },
                 { QStringLiteral( "LOGO" ), relInfo.logo() } } };
-            auto expand = [&]( const QString& s ) -> QString {
+            auto expand = [ & ]( const QString& s ) -> QString {
                 return KMacroExpander::expandMacros( s, relMap, QLatin1Char( '@' ) );
             };
 #else
@@ -202,7 +204,7 @@ Branding::Branding( const QString& brandingFilePath, QObject* parent )
 
             // Massage the strings, images and style sections.
             loadStrings( m_strings, doc, "strings", expand );
-            loadStrings( m_images, doc, "images", [&]( const QString& s ) -> QString {
+            loadStrings( m_images, doc, "images", [ & ]( const QString& s ) -> QString {
                 // See also image()
                 const QString imageName( expand( s ) );
                 QFileInfo imageFi( componentDir.absoluteFilePath( imageName ) );
@@ -358,11 +360,10 @@ Branding::image( const QString& imageName, const QSize& size ) const
     return ImageRegistry::instance()->pixmap( imageFi.absoluteFilePath(), size );
 }
 
-QString
-Branding::stylesheet() const
+static QString
+_stylesheet( const QDir& dir )
 {
-    QFileInfo fi( m_descriptorPath );
-    QFileInfo importQSSPath( fi.absoluteDir().filePath( "stylesheet.qss" ) );
+    QFileInfo importQSSPath( dir.filePath( "stylesheet.qss" ) );
     if ( importQSSPath.exists() && importQSSPath.isReadable() )
     {
         QFile stylesheetFile( importQSSPath.filePath() );
@@ -371,9 +372,15 @@ Branding::stylesheet() const
     }
     else
     {
-        cWarning() << "The branding component" << fi.absoluteDir().absolutePath() << "does not ship stylesheet.qss.";
+        cWarning() << "The branding component" << dir.absolutePath() << "does not ship stylesheet.qss.";
     }
     return QString();
+}
+
+QString
+Branding::stylesheet() const
+{
+    return _stylesheet( QFileInfo( m_descriptorPath ).absoluteDir() );
 }
 
 void
@@ -537,7 +544,7 @@ Branding::initSimpleSettings( const YAML::Node& doc )
 [[noreturn]] void
 Branding::bail( const QString& message )
 {
-    cError() << "FATAL in" << m_descriptorPath << "\n" + message;
+    cError() << "FATAL in" << m_descriptorPath << Logger::Continuation << Logger::NoQuote {} << message;
     ::exit( EXIT_FAILURE );
 }
 
