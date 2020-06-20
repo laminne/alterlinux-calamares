@@ -82,44 +82,6 @@ Presentation
             anchors.centerIn: parent
         }
         Text {
-            anchors.horizontalCenter: background3.horizontalCenter
-            anchors.top: background3.bottom
-            text: ""
-            wrapMode: Text.WordWrap
-            width: 800
-            horizontalAlignment: Text.Center
-        }
-    }
-
-    Slide {
-
-        Image {
-            id: background4
-            source: "slide4.png"
-            width: 800; height: 440
-            fillMode: Image.PreserveAspectFit
-            anchors.centerIn: parent
-        }
-        Text {
-            anchors.horizontalCenter: background4.horizontalCenter
-            anchors.top: background4.bottom
-            text: ""
-            wrapMode: Text.WordWrap
-            width: 800
-            horizontalAlignment: Text.Center
-        }
-    }
-
-    Slide {
-
-        Image {
-            id: background5
-            source: "slide5.png"
-            width: 800; height: 440
-            fillMode: Image.PreserveAspectFit
-            anchors.centerIn: parent
-        }
-        Text {
             anchors.horizontalCenter: background5.horizontalCenter
             anchors.top: background5.bottom
             text: ""
