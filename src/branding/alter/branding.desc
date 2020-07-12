@@ -67,17 +67,17 @@ windowPlacement: center
 # are visible as buttons there if the corresponding *show* keys
 # are set to "true" (they can also be overridden).
 strings:
-    productName:         Alter Linux
-    shortProductName:    Alter Linux
+    productName:         Swilner Linux
+    shortProductName:    Swilner Linux
     version:
     shortVersion:
-    versionedName:       Alter Linux
-    shortVersionedName:  Alter Linux
-    bootloaderEntryName: Alter
-    productUrl:          https://fascode.net/projects/linux/alter/
-    supportUrl:          https://github.com/SereneTeam/alterlinux/issues
-    knownIssuesUrl:      https://alterlinux.com
-    releaseNotesUrl:     https://github.com/SereneTeam/alterlinux/releases
+    versionedName:       Swilner  Linux
+    shortVersionedName:  Swilner  Linux
+    bootloaderEntryName: Swilner
+    productUrl:          
+    supportUrl:          
+    knownIssuesUrl:      
+    releaseNotesUrl:     
 
 # These images are loaded from the branding module directory.
 #
